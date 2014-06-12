@@ -19,7 +19,7 @@ Fontconfig.Pattern(; args...)
 
 For example
 ```julia
-Fontconfig.Pattern(; family="Helvetica", size=10, hinting=true)
+Fontconfig.Pattern(family="Helvetica", size=10, hinting=true)
 ```
 
 Secondly, it can be constructed with a fontconfig specifications string
@@ -50,7 +50,7 @@ matching installed font.
 Extracting property values from a `Pattern` can be done with the `format`
 function, which wraps `FcPatternFormat`.
 
-```
+```julia
 format(pat::Pattern, fmt::String="%{=fclist}")
 ```
 
