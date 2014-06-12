@@ -7,22 +7,21 @@ if Pkg.installed("Homebrew") != nothing
 end
 
 function __init__()
-    ccall((:FcInit, :libfontconfig), Uint8, ())
 
     @osx_only begin
         if Pkg.installed("Homebrew") != nothing
             if Homebrew.installed("fontconfig")
-                function __init__()
-                    ENV["PANGO_SYSCONFDIR"] = joinpath(Homebrew.prefix(), "etc", "fonts", "fonts.conf")
-                end
+                ENV["FONTCONFIG_FILE"] = joinpath(Homebrew.prefix(), "etc", "fonts", "fonts.conf")
             end
         end
-
-        # By default fontconfig on OSX does not include user fonts.
-        ccall((:FcConfigAppFontAddDir, :libfontconfig),
-              Uint8, (Ptr{Void}, Ptr{Uint8}),
-              C_NULL, b"~/Library/Fonts")
     end
+
+    ccall((:FcInit, :libfontconfig), Uint8, ())
+
+    # By default fontconfig on OSX does not include user fonts.
+    @osx_only ccall((:FcConfigAppFontAddDir, :libfontconfig),
+                      Uint8, (Ptr{Void}, Ptr{Uint8}),
+                      C_NULL, b"~/Library/Fonts")
 end
 
 
