@@ -1,5 +1,7 @@
 module Fontconfig
 
+using Compat
+
 export format, match, list
 
 if Pkg.installed("Homebrew") != nothing
@@ -25,9 +27,9 @@ function __init__()
 end
 
 
-const FcMatchPattern = uint32(0)
-const FcMatchFont    = uint32(1)
-const FcMatchScan    = uint32(2)
+const FcMatchPattern = @compat UInt32(0)
+const FcMatchFont    = @compat UInt32(1)
+const FcMatchScan    = @compat UInt32(2)
 
 const string_attrs = Set([:family, :style, :foundry, :file, :lang,
                           :fullname, :familylang, :stylelang, :fullnamelang,
@@ -93,7 +95,7 @@ function Base.show(io::IO, pat::Pattern)
     desc = ccall((:FcNameUnparse, :libfontconfig), Ptr{Uint8},
                  (Ptr{Void},), pat.ptr)
     @printf(io, "Fontconfig.Pattern(\"%s\")", bytestring(desc))
-    c_free(desc)
+    @compat Libc.free(desc)
 end
 
 
@@ -127,7 +129,7 @@ function format(pat::Pattern, fmt::String="%{=fclist}")
         error("Invalid fontconfig format.")
     end
     descstr = bytestring(desc)
-    c_free(desc)
+    @compat Libc.free(desc)
     return descstr
 end
 
