@@ -1,3 +1,6 @@
+
+VERSION >= v"0.4.0-dev+6521" && __precompile__()
+
 module Fontconfig
 
 using Compat
@@ -18,11 +21,11 @@ function __init__()
         end
     end
 
-    ccall((:FcInit, :libfontconfig), Uint8, ())
+    ccall((:FcInit, :libfontconfig), UInt8, ())
 
     # By default fontconfig on OSX does not include user fonts.
     @osx_only ccall((:FcConfigAppFontAddDir, :libfontconfig),
-                      Uint8, (Ptr{Void}, Ptr{Uint8}),
+                      UInt8, (Ptr{Void}, Ptr{UInt8}),
                       C_NULL, b"~/Library/Fonts")
 end
 
@@ -54,19 +57,19 @@ type Pattern
         for (attr, value) in args
             if attr in string_attrs
                 ccall((:FcPatternAddString, :libfontconfig), Cint,
-                      (Ptr{Void}, Ptr{Uint8}, Ptr{Uint8}),
+                      (Ptr{Void}, Ptr{UInt8}, Ptr{UInt8}),
                       ptr, string(attr), value)
             elseif attr in double_attrs
                 ccall((:FcPatternAddDouble, :libfontconfig), Cint,
-                      (Ptr{Void}, Ptr{Uint8}, Cdouble),
+                      (Ptr{Void}, Ptr{UInt8}, Cdouble),
                       ptr, string(attr), value)
             elseif attr in integer_attrs
                 ccall((:FcPatternAddInteger, :libfontconfig), Cint,
-                      (Ptr{Void}, Ptr{Uint8}, Cint),
+                      (Ptr{Void}, Ptr{UInt8}, Cint),
                       ptr, string(attr), value)
             elseif attr in bool_attrs
                 ccall((:FcPatternAddBool, :libfontconfig), Cint,
-                      (Ptr{Void}, Ptr{Uint8}, Cint),
+                      (Ptr{Void}, Ptr{UInt8}, Cint),
                       ptr, string(attr), value)
             end
         end
@@ -81,8 +84,8 @@ type Pattern
         return new(ptr)
     end
 
-    function Pattern(name::String)
-        ptr = ccall((:FcNameParse, :libfontconfig), Ptr{Void}, (Ptr{Uint8},), name)
+    function Pattern(name::AbstractString)
+        ptr = ccall((:FcNameParse, :libfontconfig), Ptr{Void}, (Ptr{UInt8},), name)
         pat = new(ptr)
         finalizer(pat, pat -> ccall((:FcPatternDestroy, :libfontconfig), Void,
                                     (Ptr{Void},), pat.ptr))
@@ -92,7 +95,7 @@ end
 
 
 function Base.show(io::IO, pat::Pattern)
-    desc = ccall((:FcNameUnparse, :libfontconfig), Ptr{Uint8},
+    desc = ccall((:FcNameUnparse, :libfontconfig), Ptr{UInt8},
                  (Ptr{Void},), pat.ptr)
     @printf(io, "Fontconfig.Pattern(\"%s\")", bytestring(desc))
     @compat Libc.free(desc)
@@ -101,7 +104,7 @@ end
 
 function Base.match(pat::Pattern, default_substitute::Bool=true)
     ccall((:FcConfigSubstitute, :libfontconfig),
-          Uint8, (Ptr{Void}, Ptr{Void}, Int32),
+          UInt8, (Ptr{Void}, Ptr{Void}, Int32),
           C_NULL, pat.ptr, FcMatchPattern)
 
     if default_substitute
@@ -122,9 +125,9 @@ function Base.match(pat::Pattern, default_substitute::Bool=true)
 end
 
 
-function format(pat::Pattern, fmt::String="%{=fclist}")
-    desc = ccall((:FcPatternFormat, :libfontconfig), Ptr{Uint8},
-                 (Ptr{Void}, Ptr{Uint8}), pat.ptr, fmt)
+function format(pat::Pattern, fmt::AbstractString="%{=fclist}")
+    desc = ccall((:FcPatternFormat, :libfontconfig), Ptr{UInt8},
+                 (Ptr{Void}, Ptr{UInt8}), pat.ptr, fmt)
     if desc == C_NULL
         error("Invalid fontconfig format.")
     end
@@ -143,11 +146,11 @@ end
 
 function list(pat::Pattern=Pattern())
     os = ccall((:FcObjectSetCreate, :libfontconfig), Ptr{Void}, ())
-    ccall((:FcObjectSetAdd, :libfontconfig), Cint, (Ptr{Void}, Ptr{Uint8}),
+    ccall((:FcObjectSetAdd, :libfontconfig), Cint, (Ptr{Void}, Ptr{UInt8}),
           os, "family")
-    ccall((:FcObjectSetAdd, :libfontconfig), Cint, (Ptr{Void}, Ptr{Uint8}),
+    ccall((:FcObjectSetAdd, :libfontconfig), Cint, (Ptr{Void}, Ptr{UInt8}),
           os, "style")
-    ccall((:FcObjectSetAdd, :libfontconfig), Cint, (Ptr{Void}, Ptr{Uint8}),
+    ccall((:FcObjectSetAdd, :libfontconfig), Cint, (Ptr{Void}, Ptr{UInt8}),
           os, "file")
 
     fs_ptr = ccall((:FcFontList, :libfontconfig), Ptr{FcFontSet},
