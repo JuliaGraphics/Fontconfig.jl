@@ -13,7 +13,7 @@ end
 
 function __init__()
 
-    @osx_only begin
+    @static if is_apple()
         if Pkg.installed("Homebrew") != nothing
             if Homebrew.installed("fontconfig")
                 ENV["FONTCONFIG_FILE"] = joinpath(Homebrew.prefix(), "etc", "fonts", "fonts.conf")
@@ -24,9 +24,11 @@ function __init__()
     ccall((:FcInit, :libfontconfig), UInt8, ())
 
     # By default fontconfig on OSX does not include user fonts.
-    @osx_only ccall((:FcConfigAppFontAddDir, :libfontconfig),
-                      UInt8, (Ptr{Void}, Ptr{UInt8}),
-                      C_NULL, b"~/Library/Fonts")
+    @static if is_apple()
+        ccall((:FcConfigAppFontAddDir, :libfontconfig),
+               UInt8, (Ptr{Void}, Ptr{UInt8}),
+               C_NULL, b"~/Library/Fonts")
+    end
 end
 
 
@@ -97,7 +99,7 @@ end
 function Base.show(io::IO, pat::Pattern)
     desc = ccall((:FcNameUnparse, :libfontconfig), Ptr{UInt8},
                  (Ptr{Void},), pat.ptr)
-    @printf(io, "Fontconfig.Pattern(\"%s\")", bytestring(desc))
+    @printf(io, "Fontconfig.Pattern(\"%s\")", unsafe_string(desc))
     @compat Libc.free(desc)
 end
 
@@ -131,7 +133,7 @@ function format(pat::Pattern, fmt::AbstractString="%{=fclist}")
     if desc == C_NULL
         error("Invalid fontconfig format.")
     end
-    descstr = bytestring(desc)
+    descstr = unsafe_string(desc)
     @compat Libc.free(desc)
     return descstr
 end
