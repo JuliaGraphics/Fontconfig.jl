@@ -1,24 +1,25 @@
-
-VERSION >= v"0.4.0-dev+6521" && __precompile__()
+__precompile__()
 
 module Fontconfig
 
+depsfile = joinpath(dirname(@__FILE__), "..", "deps", "deps.jl")
+if isfile(depsfile)
+    include(depsfile)
+else
+    error("Fontconfig.jl not properly installed. Please run `Pkg.build(\"Fontconfig\")` " *
+          "and restart Julia.")
+end
+
 using Compat
-
-export format, match, list
-
-if Pkg.installed("Homebrew") != nothing
+@static if is_apple()
     using Homebrew
 end
 
-function __init__()
+export format, match, list
 
+function __init__()
     @static if is_apple()
-        if Pkg.installed("Homebrew") != nothing
-            if Homebrew.installed("fontconfig")
-                ENV["FONTCONFIG_FILE"] = joinpath(Homebrew.prefix(), "etc", "fonts", "fonts.conf")
-            end
-        end
+        ENV["FONTCONFIG_FILE"] = joinpath(Homebrew.prefix(), "etc", "fonts", "fonts.conf")
     end
 
     ccall((:FcInit, :libfontconfig), UInt8, ())
