@@ -30,4 +30,4 @@ provides(Zypper,
         "libfontconfig" => fontconfig
     ))
 
-@BinDeps.install Dict(:fontconfig => :libfontconfig)
+@BinDeps.install Dict(:fontconfig => :jl_libfontconfig)
