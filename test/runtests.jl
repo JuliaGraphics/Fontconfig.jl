@@ -1,5 +1,10 @@
 using Fontconfig
 using Base.Test
 
-# write your own tests here
-@test 1 == 1
+# select basic font
+pattern = Fontconfig.Pattern(family="Helvetica", size=10, hinting=true)
+
+# check that methods don't crash
+match(pattern)
+format(pattern)
+list(pattern)
