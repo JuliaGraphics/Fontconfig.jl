@@ -15,7 +15,7 @@ end
 
 if is_windows()
     using WinRPM
-    provides(WinRPM.RPM, "freetype", freetype, os = :Windows)
+    provides(WinRPM.RPM, "libfreetype6", freetype, os = :Windows)
     provides(WinRPM.RPM, "fontconfig", fontconfig, os = :Windows)
 end
 
