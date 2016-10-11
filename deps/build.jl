@@ -3,7 +3,7 @@ using Compat
 
 @BinDeps.setup
 
-freetype = library_dependency("freetype", aliases = ["libfreetype"])
+freetype = library_dependency("freetype", aliases = ["libfreetype", "libfreetype-6"])
 fontconfig = library_dependency("fontconfig", aliases = ["libfontconfig-1", "libfontconfig", "libfontconfig.so.1"], depends = [freetype])
 
 
@@ -15,7 +15,7 @@ end
 
 if is_windows()
     using WinRPM
-    provides(WinRPM.RPM, "libfreetype6", freetype, os = :Windows)
+    provides(WinRPM.RPM, "freetype", freetype, os = :Windows)
     provides(WinRPM.RPM, "fontconfig", fontconfig, os = :Windows)
 end
 
