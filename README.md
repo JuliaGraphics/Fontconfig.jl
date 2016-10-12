@@ -1,6 +1,8 @@
 # Fontconfig
 
-[![Build Status](https://travis-ci.org/dcjones/Fontconfig.jl.svg?branch=master)](https://travis-ci.org/dcjones/Fontconfig.jl)
+[![Build Status](https://travis-ci.org/JuliaGraphics/Fontconfig.jl.svg?branch=master)](https://travis-ci.org/JuliaGraphics/Fontconfig.jl)
+[![Build status](https://ci.appveyor.com/api/projects/status/iqmn3ungu9jfw4dj/branch/master?svg=true)](https://ci.appveyor.com/project/JuliaGraphics/fontconfig-jl/branch/master)
+
 
 Fontconfig.jl provides basic binding to [fontconfig](http://www.freedesktop.org/wiki/Software/fontconfig/).
 
@@ -66,5 +68,3 @@ function will return a vector of `Pattern`s
 ```julia
 list(pat::Pattern=Pattern())
 ```
-
-
