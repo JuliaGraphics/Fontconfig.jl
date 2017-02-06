@@ -11,17 +11,13 @@ else
 end
 
 using Compat
-@static if is_apple()
-    using Homebrew
-end
 
 export format, match, list
 
 function __init__()
-    @static if is_apple()
-        ENV["FONTCONFIG_FILE"] = joinpath(Homebrew.prefix(), "etc", "fonts", "fonts.conf")
+    if isdefined(Fontconfig, :FONTCONFIG_FILE)
+        ENV["FONTCONFIG_FILE"] = FONTCONFIG_FILE
     end
-
     ccall((:FcInit, jl_libfontconfig), UInt8, ())
 
     # By default fontconfig on OSX does not include user fonts.
