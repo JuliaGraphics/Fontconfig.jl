@@ -10,7 +10,8 @@ fontconfig = library_dependency("fontconfig", aliases = ["libfontconfig-1", "lib
 if is_apple()
     using Homebrew
     provides(Homebrew.HB, "freetype", freetype, os = :Darwin)
-    provides(Homebrew.HB, "fontconfig", fontconfig, os = :Darwin)
+    FONTCONFIG_FILE = joinpath(Homebrew.prefix(), "etc", "fonts", "fonts.conf")
+    provides(Homebrew.HB, "fontconfig", fontconfig, os = :Darwin, onload="const FONTCONFIG_FILE = \"$FONTCONFIG_FILE\"\n")
 end
 
 if is_windows()
