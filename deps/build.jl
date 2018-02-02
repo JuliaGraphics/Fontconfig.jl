@@ -1,5 +1,6 @@
 using BinDeps
 using Compat
+import Compat.Sys
 
 @BinDeps.setup
 
@@ -7,7 +8,7 @@ freetype = library_dependency("freetype", aliases = ["libfreetype", "libfreetype
 fontconfig = library_dependency("fontconfig", aliases = ["libfontconfig-1", "libfontconfig", "libfontconfig.so.1"], depends = [freetype])
 
 
-if is_apple()
+if Sys.isapple()
     using Homebrew
     provides(Homebrew.HB, "freetype", freetype, os = :Darwin)
     FONTCONFIG_FILE = joinpath(Homebrew.prefix(), "etc", "fonts", "fonts.conf")
