@@ -31,9 +31,9 @@ function __init__()
 end
 
 
-const FcMatchPattern = @compat UInt32(0)
-const FcMatchFont    = @compat UInt32(1)
-const FcMatchScan    = @compat UInt32(2)
+const FcMatchPattern = UInt32(0)
+const FcMatchFont    = UInt32(1)
+const FcMatchScan    = UInt32(2)
 
 const string_attrs = Set([:family, :style, :foundry, :file, :lang,
                           :fullname, :familylang, :stylelang, :fullnamelang,
@@ -99,7 +99,7 @@ function Base.show(io::IO, pat::Pattern)
     desc = ccall((:FcNameUnparse, jl_libfontconfig), Ptr{UInt8},
                  (Ptr{Nothing},), pat.ptr)
     @printf(io, "Fontconfig.Pattern(\"%s\")", unsafe_string(desc))
-    @compat Libc.free(desc)
+    Libc.free(desc)
 end
 
 
@@ -133,7 +133,7 @@ function format(pat::Pattern, fmt::AbstractString="%{=fclist}")
         error("Invalid fontconfig format.")
     end
     descstr = unsafe_string(desc)
-    @compat Libc.free(desc)
+    Libc.free(desc)
     return descstr
 end
 
