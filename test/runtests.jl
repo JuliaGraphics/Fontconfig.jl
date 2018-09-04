@@ -1,5 +1,5 @@
 using Fontconfig
-using Base.Test
+using Compat.Test
 
 # select basic font
 pattern = Fontconfig.Pattern(family="Helvetica", size=10, hinting=true)
