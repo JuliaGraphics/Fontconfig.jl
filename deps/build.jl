@@ -28,7 +28,7 @@ provides(AptGet,
     ))
 
 provides(Yum,
-    @compat Dict(
+    Dict(
         "fontconfig" => fontconfig
     ))
 
