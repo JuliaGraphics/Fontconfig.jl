@@ -14,9 +14,7 @@ using Printf
 export format, match, list
 
 function __init__()
-    if isdefined(Fontconfig, :FONTCONFIG_FILE)
-        ENV["FONTCONFIG_FILE"] = FONTCONFIG_FILE
-    end
+    ENV["FONTCONFIG_FILE"] = joinpath(dirname(jl_libfontconfig), "..", "etc", "fonts", "fonts.conf")
     ccall((:FcInit, jl_libfontconfig), UInt8, ())
 
     # By default fontconfig on OSX does not include user fonts.
