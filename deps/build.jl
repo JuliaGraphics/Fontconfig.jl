@@ -21,9 +21,9 @@ dependencies = [
 ]
 
 for dependency in dependencies
-    # On macOS let's use system libuuid
-    platform_key_abi() isa MacOS &&
-        occursin(r"^build_(Libuuid)", dependency) &&
+    # On macOS let's use system libuuid, this library is not available for Windows
+    platform_key_abi() isa Union{MacOS,Windows} &&
+        occursin(r"^build_Libuuid", dependency) &&
         continue
 
     # it's a bit faster to run the build in an anonymous module instead of
