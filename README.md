@@ -1,7 +1,8 @@
 # Fontconfig
 
 [![Build Status](https://travis-ci.org/JuliaGraphics/Fontconfig.jl.svg?branch=master)](https://travis-ci.org/JuliaGraphics/Fontconfig.jl)
-[![Build status](https://ci.appveyor.com/api/projects/status/iqmn3ungu9jfw4dj/branch/master?svg=true)](https://ci.appveyor.com/project/JuliaGraphics/fontconfig-jl/branch/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/swy9jacgux1nveo0/branch/master?svg=true)](https://ci.appveyor.com/project/SimonDanisch/fontconfig-jl-4rmrs/branch/master)
+
 
 
 Fontconfig.jl provides basic binding to [fontconfig](http://www.freedesktop.org/wiki/Software/fontconfig/).
