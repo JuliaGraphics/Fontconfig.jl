@@ -11,25 +11,27 @@ products = [
 
 dependencies = [
     # Freetype2-related dependencies
-    "https://github.com/bicycle1885/ZlibBuilder/releases/download/v1.0.4/build_Zlib.v1.2.11.jl",
-    "https://github.com/JuliaPackaging/Yggdrasil/releases/download/Bzip2-v1.0.6-2/build_Bzip2.v1.0.6.jl",
-    "https://github.com/JuliaGraphics/FreeTypeBuilder/releases/download/v2.9.1-4/build_FreeType2.v2.10.0.jl",
-
+    "build_Zlib.v1.2.11.jl",
+    "build_Bzip2.v1.0.6.jl",
+    "build_FreeType2.v2.10.1.jl",
     # Fontconfig-related dependencies
-    "https://github.com/giordano/Yggdrasil/releases/download/Cairo-v1.14.12/build_Libuuid.v2.34.0.jl",
-    "https://github.com/giordano/Yggdrasil/releases/download/Cairo-v1.14.12/build_Expat.v2.2.7.jl",
-    "https://github.com/giordano/Yggdrasil/releases/download/Cairo-v1.14.12/build_Fontconfig.v2.13.1.jl"
+    "build_Libuuid.v2.34.0.jl",
+    "build_Expat.v2.2.7.jl",
+    "build_Fontconfig.v2.13.1.jl",
 ]
 
 for dependency in dependencies
-    file = joinpath(@__DIR__, basename(dependency))
-    isfile(file) || download(dependency, file)
+    # On macOS let's use system libuuid, this library is not available for Windows
+    platform_key_abi() isa Union{MacOS,Windows} &&
+        occursin(r"^build_Libuuid", dependency) &&
+        continue
+
     # it's a bit faster to run the build in an anonymous module instead of
     # starting a new julia process
 
     # Build the dependencies
     Mod = @eval module Anon end
-    Mod.include(file)
+    Mod.include(dependency)
 end
 
 # Finally, write out a deps.jl file
