@@ -1,54 +1,38 @@
-using BinDeps
-using Compat
-import Compat.Sys
+using BinaryProvider # requires BinaryProvider 0.3.0 or later
 
-@BinDeps.setup
+# Parse some basic command-line arguments
+const verbose = "--verbose" in ARGS
+const prefix = Prefix(get([a for a in ARGS if a != "--verbose"], 1, joinpath(@__DIR__, "usr")))
 
-freetype = library_dependency("freetype", aliases = ["libfreetype", "libfreetype-6"])
-fontconfig = library_dependency("fontconfig", aliases = ["libfontconfig-1", "libfontconfig", "libfontconfig.so.1"], depends = [freetype])
+# These are the two binary objects we care about
+products = [
+    LibraryProduct(prefix, ["libfontconfig"], :jl_libfontconfig),
+]
 
+dependencies = [
+    # Freetype2-related dependencies
+    "build_Zlib.v1.2.11.jl",
+    "build_Bzip2.v1.0.6.jl",
+    "build_FreeType2.v2.10.1.jl",
+    # Fontconfig-related dependencies
+    "build_Libuuid.v2.34.0.jl",
+    "build_Expat.v2.2.7.jl",
+    "build_Fontconfig.v2.13.1.jl",
+]
 
-if Sys.isapple()
-    using Homebrew
-    provides(Homebrew.HB, "freetype", freetype, os = :Darwin)
-    FONTCONFIG_FILE = joinpath(Homebrew.prefix(), "etc", "fonts", "fonts.conf")
-    provides(Homebrew.HB, "fontconfig", fontconfig, os = :Darwin, onload="const FONTCONFIG_FILE = \"$FONTCONFIG_FILE\"\n")
+for dependency in dependencies
+    # On macOS let's use system libuuid, this library is not available for Windows
+    platform_key_abi() isa Union{MacOS,Windows} &&
+        occursin(r"^build_Libuuid", dependency) &&
+        continue
+
+    # it's a bit faster to run the build in an anonymous module instead of
+    # starting a new julia process
+
+    # Build the dependencies
+    Mod = @eval module Anon end
+    Mod.include(dependency)
 end
 
-if Sys.iswindows()
-    using WinRPM
-    provides(WinRPM.RPM, "libfreetype6", freetype, os = :Windows)
-    provides(WinRPM.RPM, "fontconfig", fontconfig, os = :Windows)
-end
-
-# System Package Managers
-provides(AptGet,
-    Dict(
-        "libfontconfig1" => fontconfig
-    ))
-
-provides(Yum,
-    Dict(
-        "fontconfig" => fontconfig
-    ))
-
-provides(Zypper,
-    Dict(
-        "libfontconfig" => fontconfig
-    ))
-
-provides(Sources,
-    Dict(
-        URI("http://download.savannah.gnu.org/releases/freetype/freetype-2.4.11.tar.gz") => freetype,
-        URI("http://www.freedesktop.org/software/fontconfig/release/fontconfig-2.10.2.tar.gz") => fontconfig
-    ))
-
-xx(t...) = (Sys.iswindows() ? t[1] : (Sys.islinux() || length(t) == 2) ? t[2] : t[3])
-
-provides(BuildProcess,
-    Dict(
-        Autotools(libtarget = xx("objs/.libs/libfreetype.la","libfreetype.la")) => freetype,
-        Autotools(libtarget = "src/libfontconfig.la") => fontconfig
-    ))
-
-@BinDeps.install Dict(:fontconfig => :jl_libfontconfig)
+# Finally, write out a deps.jl file
+write_deps_file(joinpath(@__DIR__, "deps.jl"), products)

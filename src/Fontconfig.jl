@@ -1,5 +1,3 @@
-__precompile__()
-
 module Fontconfig
 
 depsfile = joinpath(dirname(@__FILE__), "..", "deps", "deps.jl")
@@ -10,16 +8,13 @@ else
           "and restart Julia.")
 end
 
-using Compat
-import Compat.Sys
-using Compat.Printf
+import Base.Sys
+using Printf
 
 export format, match, list
 
 function __init__()
-    if isdefined(Fontconfig, :FONTCONFIG_FILE)
-        ENV["FONTCONFIG_FILE"] = FONTCONFIG_FILE
-    end
+    ENV["FONTCONFIG_FILE"] = joinpath(dirname(jl_libfontconfig), "..", "etc", "fonts", "fonts.conf")
     ccall((:FcInit, jl_libfontconfig), UInt8, ())
 
     # By default fontconfig on OSX does not include user fonts.
@@ -76,7 +71,7 @@ mutable struct Pattern
         end
 
         pat = new(ptr)
-        @compat finalizer(pat -> ccall((:FcPatternDestroy, jl_libfontconfig), Nothing,
+        finalizer(pat -> ccall((:FcPatternDestroy, jl_libfontconfig), Nothing,
                                     (Ptr{Nothing},), pat.ptr), pat)
         return pat
     end
@@ -88,7 +83,7 @@ mutable struct Pattern
     function Pattern(name::AbstractString)
         ptr = ccall((:FcNameParse, jl_libfontconfig), Ptr{Nothing}, (Ptr{UInt8},), name)
         pat = new(ptr)
-        @compat finalizer(pat -> ccall((:FcPatternDestroy, jl_libfontconfig), Nothing,
+        finalizer(pat -> ccall((:FcPatternDestroy, jl_libfontconfig), Nothing,
                                     (Ptr{Nothing},), pat.ptr), pat)
         return pat
     end
