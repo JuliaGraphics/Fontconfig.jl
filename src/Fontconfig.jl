@@ -1,25 +1,17 @@
 module Fontconfig
 
-depsfile = joinpath(dirname(@__FILE__), "..", "deps", "deps.jl")
-if isfile(depsfile)
-    include(depsfile)
-else
-    error("Fontconfig.jl not properly installed. Please run `Pkg.build(\"Fontconfig\")` " *
-          "and restart Julia.")
-end
-
-import Base.Sys
 using Printf
+using Fontconfig_jll
 
 export format, match, list
 
 function __init__()
-    ENV["FONTCONFIG_FILE"] = joinpath(dirname(jl_libfontconfig), "..", "etc", "fonts", "fonts.conf")
-    ccall((:FcInit, jl_libfontconfig), UInt8, ())
+    ENV["FONTCONFIG_FILE"] = joinpath(dirname(libfontconfig), "..", "etc", "fonts", "fonts.conf")
+    ccall((:FcInit, libfontconfig), UInt8, ())
 
     # By default fontconfig on OSX does not include user fonts.
     @static if Sys.isapple()
-        ccall((:FcConfigAppFontAddDir, jl_libfontconfig),
+        ccall((:FcConfigAppFontAddDir, libfontconfig),
                UInt8, (Ptr{Nothing}, Ptr{UInt8}),
                C_NULL, b"~/Library/Fonts")
     end
@@ -48,30 +40,30 @@ mutable struct Pattern
     ptr::Ptr{Nothing}
 
     function Pattern(; args...)
-        ptr = ccall((:FcPatternCreate, jl_libfontconfig), Ptr{Nothing}, ())
+        ptr = ccall((:FcPatternCreate, libfontconfig), Ptr{Nothing}, ())
 
         for (attr, value) in args
             if attr in string_attrs
-                ccall((:FcPatternAddString, jl_libfontconfig), Cint,
+                ccall((:FcPatternAddString, libfontconfig), Cint,
                       (Ptr{Nothing}, Ptr{UInt8}, Ptr{UInt8}),
                       ptr, string(attr), value)
             elseif attr in double_attrs
-                ccall((:FcPatternAddDouble, jl_libfontconfig), Cint,
+                ccall((:FcPatternAddDouble, libfontconfig), Cint,
                       (Ptr{Nothing}, Ptr{UInt8}, Cdouble),
                       ptr, string(attr), value)
             elseif attr in integer_attrs
-                ccall((:FcPatternAddInteger, jl_libfontconfig), Cint,
+                ccall((:FcPatternAddInteger, libfontconfig), Cint,
                       (Ptr{Nothing}, Ptr{UInt8}, Cint),
                       ptr, string(attr), value)
             elseif attr in bool_attrs
-                ccall((:FcPatternAddBool, jl_libfontconfig), Cint,
+                ccall((:FcPatternAddBool, libfontconfig), Cint,
                       (Ptr{Nothing}, Ptr{UInt8}, Cint),
                       ptr, string(attr), value)
             end
         end
 
         pat = new(ptr)
-        finalizer(pat -> ccall((:FcPatternDestroy, jl_libfontconfig), Nothing,
+        finalizer(pat -> ccall((:FcPatternDestroy, libfontconfig), Nothing,
                                     (Ptr{Nothing},), pat.ptr), pat)
         return pat
     end
@@ -81,9 +73,9 @@ mutable struct Pattern
     end
 
     function Pattern(name::AbstractString)
-        ptr = ccall((:FcNameParse, jl_libfontconfig), Ptr{Nothing}, (Ptr{UInt8},), name)
+        ptr = ccall((:FcNameParse, libfontconfig), Ptr{Nothing}, (Ptr{UInt8},), name)
         pat = new(ptr)
-        finalizer(pat -> ccall((:FcPatternDestroy, jl_libfontconfig), Nothing,
+        finalizer(pat -> ccall((:FcPatternDestroy, libfontconfig), Nothing,
                                     (Ptr{Nothing},), pat.ptr), pat)
         return pat
     end
@@ -91,7 +83,7 @@ end
 
 
 function Base.show(io::IO, pat::Pattern)
-    desc = ccall((:FcNameUnparse, jl_libfontconfig), Ptr{UInt8},
+    desc = ccall((:FcNameUnparse, libfontconfig), Ptr{UInt8},
                  (Ptr{Nothing},), pat.ptr)
     @printf(io, "Fontconfig.Pattern(\"%s\")", unsafe_string(desc))
     Libc.free(desc)
@@ -99,17 +91,17 @@ end
 
 
 function Base.match(pat::Pattern, default_substitute::Bool=true)
-    ccall((:FcConfigSubstitute, jl_libfontconfig),
+    ccall((:FcConfigSubstitute, libfontconfig),
           UInt8, (Ptr{Nothing}, Ptr{Nothing}, Int32),
           C_NULL, pat.ptr, FcMatchPattern)
 
     if default_substitute
-        ccall((:FcDefaultSubstitute, jl_libfontconfig),
+        ccall((:FcDefaultSubstitute, libfontconfig),
               Nothing, (Ptr{Nothing},), pat.ptr)
     end
 
     result = Int32[0]
-    mat = ccall((:FcFontMatch, jl_libfontconfig),
+    mat = ccall((:FcFontMatch, libfontconfig),
                 Ptr{Nothing}, (Ptr{Nothing}, Ptr{Nothing}, Ptr{Int32}),
                 C_NULL, pat.ptr, result)
 
@@ -122,7 +114,7 @@ end
 
 
 function format(pat::Pattern, fmt::AbstractString="%{=fclist}")
-    desc = ccall((:FcPatternFormat, jl_libfontconfig), Ptr{UInt8},
+    desc = ccall((:FcPatternFormat, libfontconfig), Ptr{UInt8},
                  (Ptr{Nothing}, Ptr{UInt8}), pat.ptr, fmt)
     if desc == C_NULL
         error("Invalid fontconfig format.")
@@ -141,15 +133,15 @@ end
 
 
 function list(pat::Pattern=Pattern())
-    os = ccall((:FcObjectSetCreate, jl_libfontconfig), Ptr{Nothing}, ())
-    ccall((:FcObjectSetAdd, jl_libfontconfig), Cint, (Ptr{Nothing}, Ptr{UInt8}),
+    os = ccall((:FcObjectSetCreate, libfontconfig), Ptr{Nothing}, ())
+    ccall((:FcObjectSetAdd, libfontconfig), Cint, (Ptr{Nothing}, Ptr{UInt8}),
           os, "family")
-    ccall((:FcObjectSetAdd, jl_libfontconfig), Cint, (Ptr{Nothing}, Ptr{UInt8}),
+    ccall((:FcObjectSetAdd, libfontconfig), Cint, (Ptr{Nothing}, Ptr{UInt8}),
           os, "style")
-    ccall((:FcObjectSetAdd, jl_libfontconfig), Cint, (Ptr{Nothing}, Ptr{UInt8}),
+    ccall((:FcObjectSetAdd, libfontconfig), Cint, (Ptr{Nothing}, Ptr{UInt8}),
           os, "file")
 
-    fs_ptr = ccall((:FcFontList, jl_libfontconfig), Ptr{FcFontSet},
+    fs_ptr = ccall((:FcFontList, libfontconfig), Ptr{FcFontSet},
                    (Ptr{Nothing}, Ptr{Nothing}, Ptr{Nothing}), C_NULL, pat.ptr, os)
     fs = unsafe_load(fs_ptr)
 
@@ -158,7 +150,7 @@ function list(pat::Pattern=Pattern())
         push!(patterns, Pattern(unsafe_load(fs.fonts, i)))
     end
 
-    ccall((:FcObjectSetDestroy, jl_libfontconfig), Nothing, (Ptr{Nothing},), os)
+    ccall((:FcObjectSetDestroy, libfontconfig), Nothing, (Ptr{Nothing},), os)
 
     return patterns
 end
