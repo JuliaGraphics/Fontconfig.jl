@@ -6,7 +6,7 @@ using Fontconfig_jll
 export format, match, list
 
 function __init__()
-    ENV["FONTCONFIG_FILE"] = joinpath(dirname(libfontconfig), "..", "etc", "fonts", "fonts.conf")
+    ENV["FONTCONFIG_FILE"] = fonts_conf
     ccall((:FcInit, libfontconfig), UInt8, ())
 
     # By default fontconfig on OSX does not include user fonts.
