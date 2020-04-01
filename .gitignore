@@ -1,9 +1,3 @@
-deps/builds
-deps/downloads
-deps/usr
-deps/src
-deps/build.log
 .DS_Store
 *~
 Manifest.toml
-deps/deps.jl
