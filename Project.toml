@@ -1,6 +1,6 @@
 name = "Fontconfig"
 uuid = "186bb1d3-e1f7-5a2c-a377-96d770f13627"
-version = "0.4.0"
+version = "0.4.1"
 
 [deps]
 Fontconfig_jll = "a3f928ae-7b40-5064-980b-68af3947d34b"
