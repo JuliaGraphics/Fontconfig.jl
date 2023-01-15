@@ -132,14 +132,18 @@ struct FcFontSet
 end
 
 
-function list(pat::Pattern=Pattern())
+"""
+    list(pat::Pattern=Pattern(), properties = ["family", "style", "file"])::Vector{Pattern}
+    
+Selects fonts matching `pat` and creates patterns from those fonts. These patterns containing only those 
+properties listed in `properties`, and returns a vector of unique such patterns, as a `Vector{Pattern}`.
+"""
+function list(pat::Pattern=Pattern(), properties = ["family", "style", "file"])
     os = ccall((:FcObjectSetCreate, libfontconfig), Ptr{Nothing}, ())
-    ccall((:FcObjectSetAdd, libfontconfig), Cint, (Ptr{Nothing}, Ptr{UInt8}),
-          os, "family")
-    ccall((:FcObjectSetAdd, libfontconfig), Cint, (Ptr{Nothing}, Ptr{UInt8}),
-          os, "style")
-    ccall((:FcObjectSetAdd, libfontconfig), Cint, (Ptr{Nothing}, Ptr{UInt8}),
-          os, "file")
+    for property in properties
+        ccall((:FcObjectSetAdd, libfontconfig), Cint, (Ptr{Nothing}, Ptr{UInt8}),
+              os, property)
+    end
 
     fs_ptr = ccall((:FcFontList, libfontconfig), Ptr{FcFontSet},
                    (Ptr{Nothing}, Ptr{Nothing}, Ptr{Nothing}), C_NULL, pat.ptr, os)
