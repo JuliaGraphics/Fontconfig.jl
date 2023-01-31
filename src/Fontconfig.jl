@@ -38,7 +38,7 @@ const bool_attrs = Set([:antialias, :histing, :verticallayout, :autohint, :outli
 
 include("types.jl")
 include("pattern.jl")
-
+include("search.jl")
 
 
 end # module
