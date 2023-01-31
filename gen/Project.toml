@@ -1,0 +1,8 @@
+[deps]
+Clang = "40e3b903-d033-50b4-a0cc-940c62c95e31"
+Clang_jll = "0ee61d77-7f21-5576-8119-9fcc46b10100"
+Cxx = "a0b5b9ef-44b7-5148-a2d1-f6db19f3c3d2"
+EzXML = "8f5d6c58-4d21-5cfd-889c-e3ad7ee6a615"
+Fontconfig_jll = "a3f928ae-7b40-5064-980b-68af3947d34b"
+JuliaFormatter = "98e50ef6-434e-11e9-1051-2b60c6c9e899"
+MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
