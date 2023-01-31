@@ -1,0 +1,25 @@
+[general]
+library_name = "fontconfig"
+jll_pkg_name = "Fontconfig_jll"
+output_file_path = "./fontconfig.jl"
+extract_c_comment_style = "gtk-doc"
+fold_single_line_comment = true
+smart_de_anonymize = true
+
+[codegen]
+use_ccall_macro = true
+always_NUL_terminated_string = true
+opaque_as_mutable_struct = false
+use_julia_bool = true
+is_function_strictly_typed = true
+
+[codegen.macro]
+# it‘s highly recommended to set this entry to "basic".
+# if you'd like to skip all of the macros, please set this entry to "disable".
+# if you'd like to translate function-like macros to Julia, please set this entry to "aggressive".
+macro_mode = "disable"
+
+
+# if true, the generator prints the following message as comments.
+# "# Skipping MacroDefinition: ..."
+add_comment_for_skipped_macro = true
